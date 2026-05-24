@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KERA HUB — Tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --dark: #0A0A0A;
+    --dark2: #111111;
+    --dark3: #1A1A1A;
+    --border: rgba(201,168,76,0.18);
+    --text: #E8E0D0;
+    --muted: #6B6355;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* Header */
+  header {
+    padding: 36px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .header-right {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .date-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 2;
+  }
+
+  #clock {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+  }
+
+  /* Main */
+  main {
+    flex: 1;
+    padding: 48px 32px 40px;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* App Cards */
+  .apps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .app-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 24px;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transition: transform 0.22s ease;
+    transform-origin: bottom;
+  }
+
+  .app-card:nth-child(1) { animation-delay: 0.1s; }
+  .app-card:nth-child(2) { animation-delay: 0.2s; }
+  .app-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .app-card:hover {
+    background: var(--dark3);
+    border-color: rgba(201,168,76,0.4);
+    transform: translateX(4px);
+  }
+
+  .app-card:hover::before {
+    transform: scaleY(1);
+  }
+
+  .app-card:active {
+    transform: translateX(6px) scale(0.99);
+  }
+
+  .icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .icon-check { background: rgba(34,197,94,0.1); }
+  .icon-inco  { background: rgba(59,130,246,0.1); }
+  .icon-match { background: rgba(201,168,76,0.1); }
+
+  .app-info { flex: 1; }
+
+  .app-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .app-desc {
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .arrow {
+    font-size: 1rem;
+    color: var(--gold);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: all 0.22s ease;
+    flex-shrink: 0;
+  }
+
+  .app-card:hover .arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Divider */
+  .divider {
+    margin: 40px 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .divider span {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    gap: 12px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+    animation: pulse 2s infinite;
+  }
+
+  /* Footer */
+  footer {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .footer-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* Mobile tweaks */
+  @media (max-width: 480px) {
+    header { padding: 24px 20px 16px; }
+    main   { padding: 36px 20px 32px; }
+    footer { padding: 16px 20px; }
+    .logo  { font-size: 1.9rem; }
+    .app-card { padding: 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">KERA HUB</div>
+    <div class="logo-sub">Tableau de bord opérationnel · Le Bourget</div>
+  </div>
+  <div class="header-right">
+    <div class="date-label" id="date-label">—</div>
+    <div id="clock">--:--</div>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">Applications</div>
+
+  <div class="apps">
+
+    <a class="app-card" href="https://momo28111-wq.github.io/Kera-check" target="_blank" rel="noopener">
+      <div class="icon-wrap icon-check">📷</div>
+      <div class="app-info">
+        <div class="app-name">KERA CHECK</div>
+        <div class="app-desc">Vérification photo des livraisons · Contrôle qualité IA avant départ</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="app-card" href="https://momo28111-wq.github.io/kera-catering" target="_blank" rel="noopener">
+      <div class="icon-wrap icon-inco">📋</div>
+      <div class="app-info">
+        <div class="app-name">KERA INCO</div>
+        <div class="app-desc">Gestion recettes & conformité · Allergènes, DLC, étiquettes INCO</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="app-card" href="https://momo28111-wq.github.io/kera-match" target="_blank" rel="noopener">
+      <div class="icon-wrap icon-match">🔍</div>
+      <div class="app-info">
+        <div class="app-name">KERA MATCH</div>
+        <div class="app-desc">Analyse & matching commandes · Vérification des bons de livraison</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="divider"><span>Statut</span></div>
+
+  <div class="status-bar">
+    <div class="status-pill"><div class="dot"></div> Système actif</div>
+    <div class="status-pill">Le Bourget · LFPB</div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-brand">KERA CATERING</div>
+  <div class="footer-tag">Aviation Privée · Goussainville</div>
+</footer>
+
+<script>
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+
+    const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    const months = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    const d = now;
+    document.getElementById('date-label').textContent =
+      days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+</script>
+
+</body>
+</html>
